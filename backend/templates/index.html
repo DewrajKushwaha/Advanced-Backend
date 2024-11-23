@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Prediction</title>
+</head>
+<body>
+    <form action="/predict" method="POST">
+        <ul>
+            <li><input type="number" step="any" name="N" id="N" required> Enter value of N</li><br>
+            <li><input type="number" step="any" name="P" id="P" required> Enter value of P</li><br>
+            <li><input type="number" step="any" name="K" id="K" required> Enter value of K</li><br>
+            <li><input type="number" step="any" name="T" id="T" required> Enter value of T</li><br>
+            <li><input type="number" step="any" name="H" id="H" required> Enter value of H</li><br>
+            <li><input type="number" step="any" name="PH" id="PH" required> Enter value of PH</li><br>
+            <li><input type="number" step="any" name="RF" id="RF" required> Enter value of RF</li><br>
+        </ul>
+        <button type="submit" style="margin-left: 54px;">Submit</button>
+    </form>
+    
+    {% if result %}
+    <h2>Recommended Crop:</h2>
+    <p>{{ result }}</p>
+    {% endif %}
+</body>
+</html>
