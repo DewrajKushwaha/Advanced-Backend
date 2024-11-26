@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const doctorSchema=new mongoose.Schema({
     name:{
@@ -23,4 +23,4 @@ const doctorSchema=new mongoose.Schema({
     }
 },{timestamps:true})
 
-export const doctorRecord=mongoose.model('doctorRecord',doctorRecord)
+export const doctorRecord=mongoose.model('doctorRecord',doctorSchema)
