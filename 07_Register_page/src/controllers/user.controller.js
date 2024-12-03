@@ -284,19 +284,19 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     if (!avatar.url) {
         throw new ApiError(400, "Error while uploading Avatar")
     }
-    const user= await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
-            $set:{
-                avater:avater.url
+            $set: {
+                avater: avater.url
             }
-        },{
-            new:true
-        }).select("-password")
+        }, {
+        new: true
+    }).select("-password")
 
     return res
-    .status(200)
-    .json(200,user,"Avatar image is updated")
+        .status(200)
+        .json(200, user, "Avatar image is updated")
 })
 const updateUsercoverImage = asyncHandler(async (req, res) => {
     const coverImageLocalPath = req.file?.path
@@ -307,20 +307,97 @@ const updateUsercoverImage = asyncHandler(async (req, res) => {
     if (!coverImage.url) {
         throw new ApiError(400, "Error while uploading Avatar")
     }
-    const user= await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
-            $set:{
-                coverImage:coverImage.url
+            $set: {
+                coverImage: coverImage.url
             }
-        },{
-            new:true
-        }).select("-password")
+        }, {
+        new: true
+    }).select("-password")
+
+    return res
+        .status(200)
+        .json(200, user, "coverImage image is updated")
+})
+
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+    const { userName } = req.params
+
+    if (!userName?.trim()) {
+        throw new ApiError(400, "Username is missing")
+    }
+    // we use aggreigation pipeline :- 
+    const channel = await User.aggregate([
+        {
+            $match: {
+                userName: userName?.toLowerCase()
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        }, {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields: {
+                subscribersCount: {
+                    $size: "$subscribers"
+                },
+
+                channelsSubscribedToCount: {
+                    $size: "$subscribedTo"
+                },
+                isSubscribed:{
+                    
+                    $cond:{
+                        if:{$in:[req.user?._id,"$subscribers.subscriber"]},
+                        then:true,
+                        else:false
+                    }
+                }
+            }
+        },
+        {
+            // used to send the data to frontend 1= True
+            $project:{
+                fullName:1,
+                userName:1,
+                subscribersCount:1,
+                channelsSubscribedToCount:1,
+                isSubscribed:1,
+                avatar:1,
+                coverImage:1,
+                email:1
+            }
+
+        }
+    ])
+
+    if(!channel?.length){
+        throw new ApiError(404,"channel does not exitst");
+        
+    }
 
     return res
     .status(200)
-    .json(200,user,"coverImage image is updated")
+    .json(
+        new ApiResponse(200,channel[0],"user channel fetched successfully")
+    )
+
 })
+
 
 export {
     registerUser,
